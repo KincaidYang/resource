@@ -1,0 +1,26 @@
+name: Upload to OSS
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Upload oss
+      env:
+        OSS_AccessKeyID: ${{ secrets.OSS_ACCESSKEYID }}
+        OSS_AccessKeySecret: ${{ secrets.OSS_ACCESSKEYSECRET }}
+        endpoint: ${{ secrets.ENDPOINT }}
+        bucketname: ${{ secrets.BUCKETNAME }}
+        region: ${{ secrets.REGION }}
+      run: |
+        curl -o ossutil-2.2.0-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2/2.2.0/ossutil-2.2.0-linux-amd64.zip
+        unzip ossutil-2.2.0-linux-amd64.zip
+        cd ossutil-2.2.0-linux-amd64
+        chmod 755 ossutil
+        ./ossutil cp -r -f -u ../ oss://$bucketname/ -e $endpoint -i $OSS_AccessKeyID -k $OSS_AccessKeySecret --region $region
